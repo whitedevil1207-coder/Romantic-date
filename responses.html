@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Private Responses</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#f6f4f8;margin:0;color:#222}.wrap{max-width:1000px;margin:auto;padding:24px}
+.card{background:#fff;border-radius:18px;padding:20px;box-shadow:0 8px 30px #0001;margin-bottom:16px}
+input,button{padding:12px;border-radius:10px;border:1px solid #ccc;font:inherit}button{cursor:pointer}
+table{width:100%;border-collapse:collapse;margin-top:18px;background:#fff}th,td{padding:10px;border-bottom:1px solid #eee;text-align:left;vertical-align:top}
+.badge{padding:4px 8px;border-radius:99px;background:#eee}.msg{white-space:pre-wrap}
+@media(max-width:700px){table,thead,tbody,tr,th,td{display:block}thead{display:none}tr{border-bottom:1px solid #ddd;padding:12px 0}td{border:0}td:before{content:attr(data-label);font-weight:700;display:block;margin-bottom:3px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔒 Private Date Responses</h1>
+  <div class="card">
+    <p>Enter the admin password configured on your server.</p>
+    <input id="password" type="password" placeholder="Admin password">
+    <button id="load">View responses</button>
+    <button id="logout">Clear</button>
+    <p id="status"></p>
+  </div>
+  <div id="out"></div>
+</div>
+<script>
+const pass=document.getElementById("password"),out=document.getElementById("out"),status=document.getElementById("status");
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+async function load(){
+  status.textContent="Loading...";
+  const r=await fetch("/api/admin/responses",{headers:{"x-admin-password":pass.value}});
+  if(!r.ok){status.textContent="Wrong password or server error.";out.innerHTML="";return}
+  const rows=await r.json();status.textContent=rows.length+" response(s).";
+  out.innerHTML=rows.length?`<div class="card"><table><thead><tr><th>ID</th><th>Answer</th><th>Food</th><th>Date</th><th>Time</th><th>Place</th><th>Message</th><th>Received</th></tr></thead><tbody>`+
+    rows.map(x=>`<tr><td data-label="ID">${x.id}</td><td data-label="Answer"><span class="badge">${esc(x.answer)}</span></td><td data-label="Food">${esc(x.food)}</td><td data-label="Date">${esc(x.date)}</td><td data-label="Time">${esc(x.time)}</td><td data-label="Place">${esc(x.place)}</td><td data-label="Message" class="msg">${esc(x.message)}</td><td data-label="Received">${esc(new Date(x.created_at).toLocaleString())}</td></tr>`).join("")+
+    `</tbody></table></div>`:"<div class='card'>No responses yet.</div>";
+}
+document.getElementById("load").onclick=load;
+document.getElementById("logout").onclick=()=>{pass.value="";out.innerHTML="";status.textContent=""};
+</script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A Little Question ❤️</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+body{background:linear-gradient(135deg,#ff758c,#ff7eb3,#a18cd1);color:white;overflow-x:hidden}
+.page{min-height:100vh;display:grid;place-items:center;padding:22px;position:relative}
+.card{width:min(680px,96vw);padding:34px 24px;text-align:center;border:1px solid #ffffff55;border-radius:28px;background:#ffffff20;backdrop-filter:blur(18px);box-shadow:0 24px 70px #0003;position:relative;z-index:2}
+.hidden{display:none!important}.emoji{font-size:64px}.pulse{animation:pulse 1.5s infinite}@keyframes pulse{50%{transform:scale(1.1)}}
+h1{font-size:clamp(32px,8vw,54px);margin:8px 0}h2{margin-top:24px}p{font-size:18px;line-height:1.55}
+#typing{min-height:30px;font-weight:650}
+.buttons{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:28px 0}
+button{border:0;border-radius:999px;padding:14px 24px;font-size:16px;font-weight:800;cursor:pointer;box-shadow:0 8px 20px #0003;transition:.2s}
+button:hover{transform:translateY(-3px) scale(1.03)}
+.yes{background:#fff;color:#e84367}.maybe{background:#ffd166;color:#563800}.no{background:#eee;color:#333}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
+.option{padding:18px 10px;border-radius:18px;background:#ffffff20;border:2px solid #ffffff55;cursor:pointer}
+.option.selected{background:#fff;color:#e84367;border-color:#fff}.option-icon{display:block;font-size:34px;margin-bottom:5px}
+label{text-align:left;display:block;font-weight:750;margin:15px 0 6px}
+input,select,textarea{width:100%;border:0;border-radius:12px;padding:13px;font:inherit;outline:0}
+textarea{min-height:100px;resize:vertical}.confirm{width:100%;margin-top:20px}
+.small{font-size:13px;opacity:.85}
+.heart{position:fixed;bottom:-40px;z-index:1;pointer-events:none;animation:up linear forwards}
+@keyframes up{to{transform:translateY(-110vh) rotate(360deg);opacity:0}}
+.summary{text-align:left;background:#ffffff20;border-radius:18px;padding:18px;margin-top:20px}
+.summary p{margin:8px 0}
+.notice{font-size:14px;min-height:22px}
+@media(max-width:500px){.options{grid-template-columns:1fr 1fr}.card{padding:30px 18px}}
+</style>
+</head>
+<body>
+<main class="page">
+<section class="card" id="intro">
+  <div class="emoji pulse">💌</div>
+  <h1>Hey You...</h1>
+  <p id="typing"></p>
+  <p>I have a tiny question for you.<br>And yes... I made an entire website for it. 😂❤️</p>
+  <h2>Would you go on a date with me? 🌹</h2>
+  <div class="buttons">
+    <button class="yes" id="yesBtn">YES ❤️</button>
+    <button class="maybe" id="maybeBtn">MAYBE 😏</button>
+    <button class="no" id="noBtn">NO 😂</button>
+  </div>
+  <p class="small">No pressure — pick whatever you genuinely feel. ❤️</p>
+</section>
+
+<section class="card hidden" id="planner">
+  <div class="emoji">🥰</div>
+  <h1>It's a Date! ❤️</h1>
+  <p>Now let's plan our little adventure.</p>
+  <h3>What should we eat? 🍴</h3>
+  <div class="options">
+    <div class="option" data-food="Pizza 🍕"><span class="option-icon">🍕</span>Pizza</div>
+    <div class="option" data-food="Burger 🍔"><span class="option-icon">🍔</span>Burger</div>
+    <div class="option" data-food="Café ☕"><span class="option-icon">☕</span>Café</div>
+    <div class="option" data-food="Something Else ✨"><span class="option-icon">✨</span>Something Else</div>
+  </div>
+  <label for="date">📅 Pick a date</label>
+  <input id="date" type="date">
+  <label for="time">🕐 Pick a time</label>
+  <input id="time" type="time">
+  <label for="place">📍 Where should we go?</label>
+  <select id="place">
+    <option value="">Choose a place</option>
+    <option>Café ☕</option><option>Park 🌳</option><option>Mall 🛍️</option>
+    <option>Movie 🎬</option><option>Your Favourite Place ❤️</option><option>Surprise Me ✨</option>
+  </select>
+  <label for="message">💬 Anything you want to tell me?</label>
+  <textarea id="message" maxlength="1000" placeholder="Write something..."></textarea>
+  <p class="notice" id="plannerNotice"></p>
+  <button class="yes confirm" id="confirmBtn">Send Our Plan ❤️</button>
+</section>
+
+<section class="card hidden" id="result">
+  <div class="emoji pulse">❤️</div>
+  <h1 id="resultTitle">Thank you!</h1>
+  <p id="resultText"></p>
+  <div class="summary hidden" id="summary"></div>
+</section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const intro = $("intro"), planner = $("planner"), result = $("result");
+const typingText = "Before you answer... just know that you're kinda special to me. ❤️";
+let i=0, selectedFood="";
+
+(function type(){
+  if(i < typingText.length){$("typing").textContent += typingText[i++];setTimeout(type,38)}
+})();
+
+function hearts(n=10){
+  for(let k=0;k<n;k++) setTimeout(()=>{
+    const h=document.createElement("div");h.className="heart";
+    h.textContent=["❤️","💕","💗","💖","🌹","✨"][Math.floor(Math.random()*6)];
+    h.style.left=Math.random()*100+"vw";h.style.fontSize=15+Math.random()*25+"px";
+    h.style.animationDuration=4+Math.random()*5+"s";document.body.appendChild(h);
+    setTimeout(()=>h.remove(),9000);
+  },k*70);
+}
+setInterval(()=>hearts(1),650);
+
+function show(el){[intro,planner,result].forEach(x=>x.classList.add("hidden"));el.classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"})}
+
+$("yesBtn").onclick=()=>{show(planner);hearts(12)};
+$("maybeBtn").onclick=()=>submitSimple("maybe");
+$("noBtn").onclick=()=>submitSimple("no");
+
+document.querySelectorAll(".option").forEach(el=>{
+  el.onclick=()=>{document.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));el.classList.add("selected");selectedFood=el.dataset.food}
+});
+
+async function submitSimple(answer){
+  try{
+    await send({answer});
+    show(result);
+    $("resultTitle").textContent = answer==="maybe" ? "Maybe? 😏" : "No worries ❤️";
+    $("resultText").textContent = answer==="maybe"
+      ? "Your answer has been saved. Take your time — no pressure. ❤️"
+      : "Your answer has been saved. Thanks for being honest. ❤️";
+    hearts(10);
+  }catch(e){alert("Couldn't send the response. Please try again.");}
+}
+
+async function send(payload){
+  const r=await fetch("/api/response",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  if(!r.ok) throw new Error("send failed");
+  return r.json();
+}
+
+$("confirmBtn").onclick=async()=>{
+  const date=$("date").value,time=$("time").value,place=$("place").value,message=$("message").value.trim();
+  $("plannerNotice").textContent="";
+  if(!selectedFood||!date||!time||!place){
+    $("plannerNotice").textContent="Please choose the food, date, time and place first ❤️";return;
+  }
+  $("confirmBtn").disabled=true;
+  try{
+    await send({answer:"yes",food:selectedFood,date,time,place,message});
+    show(result);
+    $("resultTitle").textContent="It's Official! ❤️";
+    $("resultText").textContent="Your date plan has been sent. See you then! 🥰";
+    $("summary").classList.remove("hidden");
+    $("summary").innerHTML =
+      "<p>🍴 <b>Food:</b> "+escapeHtml(selectedFood)+"</p>"+
+      "<p>📅 <b>Date:</b> "+escapeHtml(new Date(date+"T00:00:00").toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"}))+"</p>"+
+      "<p>🕐 <b>Time:</b> "+escapeHtml(time)+"</p>"+
+      "<p>📍 <b>Place:</b> "+escapeHtml(place)+"</p>"+
+      (message ? "<p>💬 <b>Message:</b> "+escapeHtml(message)+"</p>" : "");
+    hearts(30);
+  }catch(e){
+    $("plannerNotice").textContent="Couldn't send it. Please try again.";
+    $("confirmBtn").disabled=false;
+  }
+};
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+}
+</script>
+</body>
+</html>
